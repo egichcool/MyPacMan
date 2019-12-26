@@ -1331,10 +1331,10 @@ void Game_window::updater()
     for(int i=0;i<foodball_positions.size();i++)
     {
         if((pac_x==foodball_positions.at(i).x() && pac_y==foodball_positions.at(i).y())
-            or (pac_x-1==foodball_positions.at(i).x() && pac_y==foodball_positions.at(i).y())
-                or (pac_x+1==foodball_positions.at(i).x() && pac_y==foodball_positions.at(i).y())
-                    or (pac_x==foodball_positions.at(i).x() && pac_y-1==foodball_positions.at(i).y())
-                        or (pac_x==foodball_positions.at(i).x() && pac_y+1==foodball_positions.at(i).y()))
+            || (pac_x-1==foodball_positions.at(i).x() && pac_y==foodball_positions.at(i).y())
+                || (pac_x+1==foodball_positions.at(i).x() && pac_y==foodball_positions.at(i).y())
+                    || (pac_x==foodball_positions.at(i).x() && pac_y-1==foodball_positions.at(i).y())
+                        || (pac_x==foodball_positions.at(i).x() && pac_y+1==foodball_positions.at(i).y()))
         {
             foodball_positions.remove(i);
             foodball_graphical_items_table.at(i)->hide();
@@ -1360,10 +1360,10 @@ void Game_window::updater()
     for(int i=0;i<speedball_positions.size();i++)
     {
         if((pac_x==speedball_positions.at(i).x() && pac_y==speedball_positions.at(i).y())
-            or (pac_x-1==speedball_positions.at(i).x() && pac_y==speedball_positions.at(i).y())
-                or (pac_x+1==speedball_positions.at(i).x() && pac_y==speedball_positions.at(i).y())
-                    or (pac_x==speedball_positions.at(i).x() && pac_y-1==speedball_positions.at(i).y())
-                        or (pac_x==speedball_positions.at(i).x() && pac_y+1==speedball_positions.at(i).y()))
+            || (pac_x-1==speedball_positions.at(i).x() && pac_y==speedball_positions.at(i).y())
+                || (pac_x+1==speedball_positions.at(i).x() && pac_y==speedball_positions.at(i).y())
+                    || (pac_x==speedball_positions.at(i).x() && pac_y-1==speedball_positions.at(i).y())
+                        || (pac_x==speedball_positions.at(i).x() && pac_y+1==speedball_positions.at(i).y()))
         {
            speedball_positions.remove(i);
            speedball_graphical_items_table.at(i)->hide();
@@ -1399,10 +1399,10 @@ void Game_window::updater()
     for(int i=0;i<powerball_positions.size();i++)
     {
         if((pac_x==powerball_positions.at(i).x() && pac_y==powerball_positions.at(i).y())
-            or (pac_x-1==powerball_positions.at(i).x() && pac_y==powerball_positions.at(i).y())
-                or (pac_x+1==powerball_positions.at(i).x() && pac_y==powerball_positions.at(i).y())
-                    or (pac_x==powerball_positions.at(i).x() && pac_y-1==powerball_positions.at(i).y())
-                        or (pac_x==powerball_positions.at(i).x() && pac_y+1==powerball_positions.at(i).y()))
+            || (pac_x-1==powerball_positions.at(i).x() && pac_y==powerball_positions.at(i).y())
+                || (pac_x+1==powerball_positions.at(i).x() && pac_y==powerball_positions.at(i).y())
+                    || (pac_x==powerball_positions.at(i).x() && pac_y-1==powerball_positions.at(i).y())
+                        || (pac_x==powerball_positions.at(i).x() && pac_y+1==powerball_positions.at(i).y()))
         {
             powerball_positions.remove(i);
             powerball_graphical_items_table.at(i)->hide();
