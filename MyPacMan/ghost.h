@@ -31,6 +31,8 @@ private:
     
     int skin=0;
     
+    enum direction {left=1, up, down, right};
+    
     QString image[2][36]= {
         {":/ghosts/images/ghost_images/ghostright1.png",
          ":/ghosts/images/ghost_images/ghostright2.png",
