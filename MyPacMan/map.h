@@ -10,7 +10,9 @@ private:
     QPixmap map_background_picture;
     QVector<QPoint> pacman_paths;
     int skin=0;
-
+    const int map_width=614;
+    const int map_hight=740;
+    
 public:
     Map();
     void CreatePathPoints(int x_begin, int y_begin, int x_end, int y_end);
@@ -18,10 +20,10 @@ public:
     void LoadMapImage();
     bool IsPointAvailable(QPoint);
     QRectF boundingRect() const;
-
+    
     QPixmap getMap_Background_Picture() {return map_background_picture;}
     QVector<QPoint> getPacmanPaths() {return pacman_paths;}
-
+    
     ~Map();
 };
 
