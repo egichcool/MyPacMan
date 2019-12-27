@@ -23,66 +23,81 @@ class Game_window;
 class Game_window : public QDialog
 {
     Q_OBJECT
-
+    
 private:
     Ui::Game_window *ui;
-
+    
     QGraphicsScene scene;
-
+    
     TextStartEnd text_start_end;
-
+    
     QTimer timer;
     QTimer ghoststimer;
     QTimer pacmantimer;
-
+    
     Map pac_map;
     PowerBall power_ball;
     SpeedBall speed_ball;
     FoodBall food_ball;
-
+    
     Pacman pac_man;
     Ghost ghost1;
     Ghost ghost2;
     Ghost ghost3;
     Ghost ghost4;
-
+    
     Sounds sounds;
-
+    
+    enum direction {left=1, up, down, right};
+    
     int score;
     int foodball_items_count;
     int collision_detection_delay;
     int scarestate;
     int speedstate;
     int start_timer;
-
+    const int map_width=614;
+    const int map_hight=740;
+    const int pac_first_x=320;
+    const int pac_first_y=514;
+    const int ghost_first_x=307;
+    const int ghost_first_y=318;
+    const int ghost_death_x=307;
+    const int ghost_death_y=252;
+    const int wallpass_left_x=0;
+    const int wallpass_right_x=614;
+    const int wallpass_y=318;
+    const int cage_center=307;
+    const int cage_wigth=50;
+    
     bool ghostmoving1,ghostmoving2,ghostmoving3,ghostmoving4;
     bool ghoststart1,ghoststart2,ghoststart3,ghoststart4;
     bool start, playing, scared, speedup, all_ghosts_started, ready_to_restart;
-
+    
     QVector<QPoint> powerball_positions;
     QVector<QPoint> speedball_positions;
     QVector<QPoint> foodball_positions;
-
+    
     QGraphicsPixmapItem *map_item;
-
+    
     QVector<QGraphicsEllipseItem*> foodball_graphical_items_table;
     QVector<QGraphicsEllipseItem*> powerball_graphical_items_table;
     QVector<QGraphicsEllipseItem*> speedball_graphical_items_table;
-
+    
     QGraphicsTextItem *score_display;
     QGraphicsTextItem *lives_display;
-
+    
     QMediaPlayer *beginning_sound;
     QMediaPlayer *eat_sound1;
     QMediaPlayer *eat_sound2;
     QMediaPlayer *eat_ghost_sound;
     QMediaPlayer *pacman_death_sound;
-
+    
 public:
     explicit Game_window(QWidget *parent = 0);
     void GenerateMap();
     void PopulateMap();
-
+    
     void GenerateAndPopulateMap();
     void GenerateAndPlacePacman();
     void GenerateAndPlaceGhosts();
@@ -90,7 +105,7 @@ public:
     void ResetPacman();
     void ResetGhosts();
     void ShowScore();
-
+    
     void GhostPlayerMove();
     void GhostMove1();
     void GhostMove2();
@@ -108,13 +123,13 @@ public:
     void RespawnGhost();
     void CheckCollision();
     void EndGame(int win);
-
+    
     ~Game_window();
-
+    
 public slots:
     void updater();
     void ghostupdater();
-
+    
 protected:
     void keyPressEvent(QKeyEvent *event);
 };
