@@ -9,6 +9,8 @@
         <file>images/ghostscaredwhite.png</file>
         <file>images/pac_map2.png</file>
         <file>images/pac_map.png</file>
+        <file>images/pac_map3.png</file>
+        <file>images/pac_map4.png</file>
     </qresource>
     <qresource prefix="/ghosts">
         <file>images/ghost_images/ghostdown1.png</file>
