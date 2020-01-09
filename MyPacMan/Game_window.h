@@ -14,6 +14,7 @@
 #include <QtGui>
 #include <QMediaPlayer>
 #include <QGraphicsScene>
+#include <QString>
 
 namespace Ui
 {
@@ -25,6 +26,7 @@ class Game_window : public QDialog
     Q_OBJECT
 
 private:
+
     Ui::Game_window *ui;
 
     QGraphicsScene scene;
@@ -45,11 +47,13 @@ private:
     Ghost ghost2;
     Ghost ghost3;
     Ghost ghost4;
-    Ghost ghost;
+    Ghost ghosts[4];
 
     Sounds sounds;
 
     enum direction {left=1, up, down, right};
+
+    QString colors[4]={"orange","red","blue","pink"};
 
     int map=0;
     int score;
@@ -59,8 +63,8 @@ private:
     int scarestate;
     int speedstate;
     int start_timer;
-    const int pacmap_speed=3; // To raise the speed set value less. Stock is 4
-    const int ghost_speed=3;  // To lower the speed set value more. Stock is 4
+    const int pacmap_speed=4; // To raise the speed set value less
+    const int ghost_speed=4;  // To lower the speed set value more
     const int map_width=614;
     const int map_hight=740;
     const int pac_first_x=320;
@@ -76,6 +80,8 @@ private:
 
     bool ghostmoving1,ghostmoving2,ghostmoving3,ghostmoving4;
     bool ghoststart1,ghoststart2,ghoststart3,ghoststart4;
+    bool ghoststarts[4];
+    bool ghostmoving[4];
     bool start, playing, scared, speedup, all_ghosts_started, ready_to_restart;
 
     QVector<QPoint> powerball_positions;

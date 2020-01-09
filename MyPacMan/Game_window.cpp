@@ -84,36 +84,17 @@ void Game_window::GenerateAndPlaceGhosts()
 
     speedstate = 0;
 
-    ghost1.setIsScared(false);
-    ghost2.setIsScared(false);
-    ghost3.setIsScared(false);
-    ghost4.setIsScared(false);
-
-    ghost1.setGhost_X(ghost_first_x);
-    ghost1.setGhost_Y(ghost_first_y);
-    ghost2.setGhost_X(ghost_first_x);
-    ghost2.setGhost_Y(ghost_first_y);
-    ghost3.setGhost_X(ghost_first_x);
-    ghost3.setGhost_Y(ghost_first_y);
-    ghost4.setGhost_X(ghost_first_x);
-    ghost4.setGhost_Y(ghost_first_y);
-
-    ghost1.setGhostColor("orange");
-    ghost2.setGhostColor("red");
-    ghost3.setGhostColor("blue");
-    ghost4.setGhostColor("pink");
-
-    ghoststart1=false;
-    ghoststart2=false;
-    ghoststart3=false;
-    ghoststart4=false;
+    for(int i=0;i<4;i++)
+    {
+        ghosts[i].setIsScared(false);
+        ghosts[i].setGhost_X(ghost_first_x);
+        ghosts[i].setGhost_Y(ghost_first_y);
+        ghosts[i].setGhostColor(colors[i]);
+        ghoststarts[i]=false;
+        scene.addItem(&ghosts[i]);
+    }
 
     all_ghosts_started = false;
-
-    scene.addItem(&ghost1);
-    scene.addItem(&ghost2);
-    scene.addItem(&ghost3);
-    scene.addItem(&ghost4);
 }
 
 void Game_window::ShowScore()
@@ -144,10 +125,10 @@ void Game_window::RestartGame()
     ClearVariablesAndContainers();
 
     pac_man.show();
-    ghost1.show();
-    ghost2.show();
-    ghost3.show();
-    ghost4.show();
+    for(int i=0;i<4;i++)
+    {
+        ghosts[i].show();
+    }
 
     GenerateAndPopulateMap();
     GenerateAndPlacePacman();
@@ -182,14 +163,11 @@ void Game_window::HideSceneItems()
     pac_man.hide();
     scene.removeItem(&pac_man);
 
-    ghost1.hide();
-    ghost2.hide();
-    ghost3.hide();
-    ghost4.hide();
-    scene.removeItem(&ghost1);
-    scene.removeItem(&ghost2);
-    scene.removeItem(&ghost3);
-    scene.removeItem(&ghost4);
+    for(int i=0;i<4;i++)
+    {
+        ghosts[i].hide();
+        scene.removeItem(&ghosts[i]);
+    }
 
     for(int i=0; i<foodball_graphical_items_table.size();i++)
     {
@@ -619,10 +597,10 @@ void Game_window::keyPressEvent(QKeyEvent *event) //supports pacman movement usi
         if(!playing && ready_to_restart == true)
         {
             skin=0;
-            ghost1.setskin(skin);
-            ghost2.setskin(skin);
-            ghost3.setskin(skin);
-            ghost4.setskin(skin);
+            for(int i=0;i<4;i++)
+            {
+                ghosts[i].setskin(skin);
+            }
             Map::s_setSkin(skin);
         }
         break;
@@ -630,10 +608,10 @@ void Game_window::keyPressEvent(QKeyEvent *event) //supports pacman movement usi
         if(!playing && ready_to_restart == true)
         {
             skin=1;
-            ghost1.setskin(skin);
-            ghost2.setskin(skin);
-            ghost3.setskin(skin);
-            ghost4.setskin(skin);
+            for(int i=0;i<4;i++)
+            {
+                ghosts[i].setskin(skin);
+            }
             Map::s_setSkin(skin);
         }
         break;
@@ -671,49 +649,27 @@ void Game_window::keyPressEvent(QKeyEvent *event) //supports pacman movement usi
 }
 
 void Game_window::CheckCollision()
-{
-    if(pac_man.collidesWithItem(&ghost1) ||
-            pac_man.collidesWithItem(&ghost2) ||
-            pac_man.collidesWithItem(&ghost3) ||
-            pac_man.collidesWithItem(&ghost4))
+{    
+    if(pac_man.collidesWithItem(&ghosts[0]) ||
+            pac_man.collidesWithItem(&ghosts[1]) ||
+            pac_man.collidesWithItem(&ghosts[2]) ||
+            pac_man.collidesWithItem(&ghosts[3]))
     {
-        if(pac_man.collidesWithItem(&ghost1) && ghost1.getIsScared())
+        bool check=false;
+        for(int i=0;i<4;i++)
         {
-            sounds.eat_ghost_sound.play();
-            score+=200;
-            score_display->setPlainText("Score: " + QString::number(score));
-            ghost1.setGhost_X(ghost_death_x);
-            ghost1.setGhost_Y(ghost_death_y);
-            ghost1.setIsScared(false);
+            if(pac_man.collidesWithItem(&ghosts[i]) && ghosts[i].getIsScared())
+            {
+                sounds.eat_ghost_sound.play();
+                score+=200;
+                score_display->setPlainText("Score: " + QString::number(score));
+                ghosts[i].setGhost_X(ghost_death_x);
+                ghosts[i].setGhost_Y(ghost_death_y);
+                ghosts[i].setIsScared(false);
+                check=true;
+            }
         }
-        else if(pac_man.collidesWithItem(&ghost2) && ghost2.getIsScared())
-        {
-            sounds.eat_ghost_sound.play();
-            score+=200;
-            score_display->setPlainText("Score: " + QString::number(score));
-            ghost2.setGhost_X(ghost_death_x);
-            ghost2.setGhost_Y(ghost_death_y);
-            ghost2.setIsScared(false);
-        }
-        else if(pac_man.collidesWithItem(&ghost3) && ghost3.getIsScared())
-        {
-            sounds.eat_ghost_sound.play();
-            score+=200;
-            score_display->setPlainText("Score: " + QString::number(score));
-            ghost3.setGhost_X(ghost_death_x);
-            ghost3.setGhost_Y(ghost_death_y);
-            ghost3.setIsScared(false);
-        }
-        else if(pac_man.collidesWithItem(&ghost4) && ghost4.getIsScared())
-        {
-            sounds.eat_ghost_sound.play();
-            score+=200;
-            score_display->setPlainText("Score: " + QString::number(score));
-            ghost4.setGhost_X(ghost_death_x);
-            ghost4.setGhost_Y(ghost_death_y);
-            ghost4.setIsScared(false);
-        }
-        else
+        if (!check)
         {
             timer.stop();
             ghoststimer.stop();
@@ -819,10 +775,10 @@ void Game_window::updater()
 
             scarestate = 0;
 
-            ghost1.setIsScared(true);
-            ghost2.setIsScared(true);
-            ghost3.setIsScared(true);
-            ghost4.setIsScared(true);
+            for(int i=0;i<4;i++)
+            {
+                ghosts[i].setIsScared(true);
+            }
 
             scared=true;
 
@@ -848,6 +804,10 @@ void Game_window::updater()
 
         if(scarestate==750)
         {
+            for(int i=0;i<4;i++)
+            {
+                ghosts[i].setScaredWhite(true);
+            }
             ghost1.setScaredWhite(true);
             ghost2.setScaredWhite(true);
             ghost3.setScaredWhite(true);
@@ -857,179 +817,83 @@ void Game_window::updater()
         if(scarestate==1000)
         {
             scared=false;
-            ghost1.setIsScared(false);
-            ghost2.setIsScared(false);
-            ghost3.setIsScared(false);
-            ghost4.setIsScared(false);
-
-            ghost1.setScaredWhite(false);
-            ghost2.setScaredWhite(false);
-            ghost3.setScaredWhite(false);
-            ghost4.setScaredWhite(false);
-
+            for(int i=0;i<4;i++)
+            {
+                ghosts[i].setIsScared(false);
+                ghosts[i].setScaredWhite(false);
+            }
             scarestate = 0;
             ghoststimer.setInterval(4);
         }
     }
 
     pac_man.advance();
-    ghost1.advance();
-    ghost2.advance();
-    ghost3.advance();
-    ghost4.advance();
-
+    for(int i=0;i<4;i++)
+    {
+        ghosts[i].advance();
+    }
     scene.update(scene.sceneRect());
 }
 
 void Game_window::ghostupdater()
 {
-    int ghost1_x = ghost1.getGhost_X();
-    int ghost1_y = ghost1.getGhost_Y();
-    int ghost2_x = ghost2.getGhost_X();
-    int ghost2_y = ghost2.getGhost_Y();
-    int ghost3_x = ghost3.getGhost_X();
-    int ghost3_y = ghost3.getGhost_Y();
-    int ghost4_x = ghost4.getGhost_X();
-    int ghost4_y = ghost4.getGhost_Y();
-
+    int ghosts_x[4];
+    int ghosts_y[4];
+    for(int i=0;i<4;i++)
+    {
+        ghosts_x[i]=ghosts[i].getGhost_X();
+        ghosts_y[i]=ghosts[i].getGhost_Y();
+    }
     if(all_ghosts_started)
     {
-        GhostMove(ghost1);
-        GhostMove(ghost2);
-        GhostMove(ghost3);
-        GhostMove(ghost4);
+        for(int i=0;i<4;i++)
+        {
+            GhostMove(ghosts[i]);
+        }
     }
     else
     {
-        if(!ghoststart1)
-            MoveGhostInStartingRect(ghost1);
-        else
-            GhostMove(ghost1);
+        for(int i=0;i<4;i++)
+        {
+            if(!ghoststarts[i])
+                MoveGhostInStartingRect(ghosts[i]);
+            else
+                GhostMove(ghosts[i]);
+        }
 
-        if(!ghoststart2)
-            MoveGhostInStartingRect(ghost2);
-        else
-            GhostMove(ghost2);
-
-        if(!ghoststart3)
-            MoveGhostInStartingRect(ghost3);
-        else
-            GhostMove(ghost3);
-
-        if(!ghoststart4)
-            MoveGhostInStartingRect(ghost4);
-        else
-            GhostMove(ghost4);
-
-        if(ghost1_x==300 || ghost2_x==300 || ghost3_x==300 || ghost4_x==300) //substitute of timer to be implemented for every ghost do differentiate start time
+        if(ghosts_x[0]==300 || ghosts_x[1]==300 || ghosts_x[2]==300 || ghosts_x[3]==300) //substitute of timer to be implemented for every ghost do differentiate start time
         {
             start_timer++;
         }
 
-        if(start_timer>=3) // ghost 1 starts
+        for(int i=0;i<4;i++)
         {
-            QPoint p1;
-            if(ghost1_x>ghost_first_x)
+            if(start_timer>=(i+1)*3)
             {
-                ghost1_x-=1;
-            }
-            else if(ghost1_x<ghost_first_x)
-            {
-                ghost1_x+=1;
-            }
-
-            if(!ghoststart1)
-            {
-                ghost1_y-=1;
-                ghost1.setGhost_X(ghost1_x);
-                ghost1.setGhost_Y(ghost1_y);
-                p1.setX(ghost1_x);
-                p1.setY(ghost1_y);
-                if(Map::s_getPacmanPaths().contains(p1))
+                QPoint p1;
+                if(ghosts_x[i]>ghost_first_x)
                 {
-                    ghoststart1=true;
+                    ghosts_x[i]-=1;
+                }
+                else if(ghosts_x[i]<ghost_first_x)
+                {
+                    ghosts_x[i]+=1;
+                }
+
+                if(!ghoststarts[i])
+                {
+                    ghosts_y[i]-=1;
+                    ghosts[i].setGhost_X(ghosts_x[i]);
+                    ghosts[i].setGhost_Y(ghosts_y[i]);
+                    p1.setX(ghosts_x[i]);
+                    p1.setY(ghosts_y[i]);
+                    if(Map::s_getPacmanPaths().contains(p1))
+                    {
+                        ghoststarts[i]=true;
+                    }
                 }
             }
         }
-
-        if(start_timer>=6) // ghost 2 starts
-        {
-            QPoint p2;
-            if(ghost2_x>ghost_first_x)
-            {
-                ghost2_x-=1;
-            }
-            else if(ghost2_x<ghost_first_x)
-            {
-                ghost2_x+=1;
-            }
-
-            if(!ghoststart2)
-            {
-                ghost2_y-=1;
-                ghost2.setGhost_X(ghost2_x);
-                ghost2.setGhost_Y(ghost2_y);
-                p2.setX(ghost2_x);
-                p2.setY(ghost2_y);
-                if(Map::s_getPacmanPaths().contains(p2))
-                {
-                    ghoststart2=true;
-                }
-            }
-        }
-
-        if(start_timer>=9) // ghost 3 starts
-        {
-            QPoint p3;
-            if(ghost3_x>ghost_first_x)
-            {
-                ghost3_x-=1;
-            }
-            else if(ghost3_x<ghost_first_x)
-            {
-                ghost3_x+=1;
-            }
-
-            if(!ghoststart3)
-            {
-                ghost3_y-=1;
-                ghost3.setGhost_X(ghost3_x);
-                ghost3.setGhost_Y(ghost3_y);
-                p3.setX(ghost3_x);
-                p3.setY(ghost3_y);
-                if(Map::s_getPacmanPaths().contains(p3))
-                {
-                    ghoststart3=true;
-                }
-            }
-        }
-
-        if(start_timer>=12) // ghost 4 starts
-        {
-            QPoint p4;
-            if(ghost4_x>ghost_first_x)
-            {
-                ghost4_x-=1;
-            }
-            else if(ghost4_x<ghost_first_x)
-            {
-                ghost4_x+=1;
-            }
-
-            if(!ghoststart4)
-            {
-                ghost4_y-=1;
-                ghost4.setGhost_X(ghost4_x);
-                ghost4.setGhost_Y(ghost4_y);
-                p4.setX(ghost4_x);
-                p4.setY(ghost4_y);
-                if(Map::s_getPacmanPaths().contains(p4))
-                {
-                    ghoststart4=true;
-                }
-            }
-        }
-
         if(ghoststart1&&ghoststart2&&ghoststart3&&ghoststart4)
             all_ghosts_started=true;
     }
