@@ -59,8 +59,8 @@ private:
     int scarestate;
     int speedstate;
     int start_timer;
-    const int pacmap_speed=4; // To raise the speed set value less
-    const int ghost_speed=4;  // To lower the speed set value more
+    const int pacmap_speed=3; // To raise the speed set value less. Stock is 4
+    const int ghost_speed=3;  // To lower the speed set value more. Stock is 4
     const int map_width=614;
     const int map_hight=740;
     const int pac_first_x=320;
