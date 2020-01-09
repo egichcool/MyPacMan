@@ -4,11 +4,11 @@ Ghost::Ghost()
 {
     animestate = 0;
     animation_modify_factor = 6;
-    
+
     ghostdirection=left;
     is_scared=false;
     scared_white=false;
-    
+
 }
 
 QRectF Ghost::boundingRect() const

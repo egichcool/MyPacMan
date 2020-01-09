@@ -1,14 +1,41 @@
 #include "speedball.h"
-#include <QPoint>
-#include <QVector>
 
 SpeedBall::SpeedBall()
 {
-    QPoint speedballposition1 = QPoint(55,35);
-    QPoint speedballposition2 = QPoint(559,35);
-    QPoint speedballposition3 = QPoint(55,645);
-    QPoint speedballposition4 = QPoint(559,645);
+    setSpeedballPositions();
+}
 
+void SpeedBall::setSpeedballPositions()
+{
+    speedballpositions.clear();
+    this->skin=Map::s_getSkin();
+    CreateSpeedballPositions();
+}
+
+void SpeedBall::CreateSpeedballPositions()
+{
+    switch (skin)
+    {
+    case 0:
+    case 1:
+        speedballposition1 = QPoint(55,35);
+        speedballposition2 = QPoint(559,35);
+        speedballposition3 = QPoint(55,645);
+        speedballposition4 = QPoint(559,645);
+        break;
+    case 2:
+        speedballposition1 = QPoint(55,35);
+        speedballposition2 = QPoint(559,35);
+        speedballposition3 = QPoint(55,645);
+        speedballposition4 = QPoint(559,645);
+        break;
+    case 3:
+        speedballposition1 = QPoint(55,35);
+        speedballposition2 = QPoint(559,35);
+        speedballposition3 = QPoint(55,645);
+        speedballposition4 = QPoint(559,645);
+        break;
+    }
     speedballpositions.push_back(speedballposition1);
     speedballpositions.push_back(speedballposition2);
     speedballpositions.push_back(speedballposition3);

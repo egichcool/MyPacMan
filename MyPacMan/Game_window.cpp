@@ -13,44 +13,47 @@ Game_window::Game_window(QWidget *parent) : QDialog(parent),ui(new Ui::Game_wind
     ui->gameplay_area->setRenderHint(QPainter::Antialiasing);
     scene.setSceneRect(0,0,map_width,map_hight);
     ui->gameplay_area->setSceneRect(scene.sceneRect());
-    
+
     GenerateAndPopulateMap();
     GenerateAndPlacePacman();
     GenerateAndPlaceGhosts();
-    
+
     ShowScore();
-    
+
     collision_detection_delay = 0; //delay collision detection after game restart
-    
+
     scene.addItem(&text_start_end);
-    
+
     playing = false;
     ready_to_restart = false;
-    
+
     this->setFocus(Qt::ActiveWindowFocusReason);
 }
 
 void Game_window::GenerateAndPopulateMap()
 {
+    pac_map.LoadMapImage();
+    pac_map.LoadMap();
+    food_ball.SetFoodBallPositions();
+    power_ball.setPowerballPositions();
     powerball_positions = power_ball.getPowerBallPositions();
     speedball_positions = speed_ball.getSpeedBallPositions();
     foodball_positions = food_ball.getFoodBallPositions();
-    pac_map.LoadMapImage();
-    
+
     map_item = scene.addPixmap(pac_map.getMap_Background_Picture());
-    
+
     for(int i=0;i<powerball_positions.size();i++)
     {
         powerball_graphical_items_table.push_back(scene.addEllipse(powerball_positions.at(i).x()-5,powerball_positions.at(i).y()-8,15,15,QPen(Qt::NoPen),QBrush(Qt::yellow)));
     }
-    
+
     for(int i=0;i<speedball_positions.size();i++)
     {
         speedball_graphical_items_table.push_back(scene.addEllipse(speedball_positions.at(i).x()-5,speedball_positions.at(i).y()-8,15,15,QPen(Qt::NoPen),QBrush(Qt::green)));
     }
-    
+
     foodball_items_count=foodball_positions.size();
-    
+
     for(int i=0;i<foodball_positions.size();i++)
     {
         foodball_graphical_items_table.push_back(scene.addEllipse(foodball_positions.at(i).x(),foodball_positions.at(i).y(),7,7,QPen(Qt::NoPen),QBrush(Qt::white)));
@@ -60,32 +63,32 @@ void Game_window::GenerateAndPopulateMap()
 void Game_window::GenerateAndPlacePacman()
 {
     start=false;
-    
+
     pac_man.setDirection(left); //pacman moves left after game start
-    
+
     pac_man.setPac_X(pac_first_x);
     pac_man.setPac_Y(pac_first_y);
-    
+
     scene.addItem(&pac_man);
 }
 
 void Game_window::GenerateAndPlaceGhosts()
 {
     start_timer = 0;
-    
+
     scared = false;
-    
+
     scarestate = 0;
-    
+
     speedup = false;
-    
+
     speedstate = 0;
-    
+
     ghost1.setIsScared(false);
     ghost2.setIsScared(false);
     ghost3.setIsScared(false);
     ghost4.setIsScared(false);
-    
+
     ghost1.setGhost_X(ghost_first_x);
     ghost1.setGhost_Y(ghost_first_y);
     ghost2.setGhost_X(ghost_first_x);
@@ -94,24 +97,19 @@ void Game_window::GenerateAndPlaceGhosts()
     ghost3.setGhost_Y(ghost_first_y);
     ghost4.setGhost_X(ghost_first_x);
     ghost4.setGhost_Y(ghost_first_y);
-    
+
     ghost1.setGhostColor("orange");
     ghost2.setGhostColor("red");
     ghost3.setGhostColor("blue");
     ghost4.setGhostColor("pink");
-    
-    ghostmoving1=false;
-    ghostmoving2=false;
-    ghostmoving3=false;
-    ghostmoving4=false;
-    
+
     ghoststart1=false;
     ghoststart2=false;
     ghoststart3=false;
     ghoststart4=false;
-    
+
     all_ghosts_started = false;
-    
+
     scene.addItem(&ghost1);
     scene.addItem(&ghost2);
     scene.addItem(&ghost3);
@@ -130,39 +128,39 @@ void Game_window::ShowScore()
 void Game_window::StartGame()
 {
     sounds.beginning_sound.play();
-    
+
     text_start_end.hide();
-    
+
     connect(&timer, SIGNAL(timeout()), this,SLOT(updater()));
     connect(&ghoststimer, SIGNAL(timeout()), this,SLOT(ghostupdater()));
-    
-    timer.start(4);
-    ghoststimer.start(4);
+
+    timer.start(pacmap_speed);
+    ghoststimer.start(ghost_speed);
     this->setFocus(); //gives the keyboard input focus to this widget
 }
 
 void Game_window::RestartGame()
 {
     ClearVariablesAndContainers();
-    
+
     pac_man.show();
     ghost1.show();
     ghost2.show();
     ghost3.show();
     ghost4.show();
-    
+
     GenerateAndPopulateMap();
     GenerateAndPlacePacman();
     GenerateAndPlaceGhosts();
-    
+
     ShowScore();
-    
+
     sounds.beginning_sound.play();
-    
+
     text_start_end.hide();
-    
-    timer.start(4);
-    ghoststimer.start(4);
+
+    timer.start(pacmap_speed);
+    ghoststimer.start(ghost_speed);
     this->setFocus(); //gives the keyboard input focus to this widget
 }
 
@@ -180,10 +178,10 @@ void Game_window::HideSceneItems()
 {
     map_item->hide();
     score_display->hide();
-    
+
     pac_man.hide();
     scene.removeItem(&pac_man);
-    
+
     ghost1.hide();
     ghost2.hide();
     ghost3.hide();
@@ -192,12 +190,12 @@ void Game_window::HideSceneItems()
     scene.removeItem(&ghost2);
     scene.removeItem(&ghost3);
     scene.removeItem(&ghost4);
-    
+
     for(int i=0; i<foodball_graphical_items_table.size();i++)
     {
         foodball_graphical_items_table.at(i)->hide();
     }
-    
+
     for(int i=0; i<powerball_graphical_items_table.size();i++)
     {
         powerball_graphical_items_table.at(i)->hide();
@@ -213,33 +211,33 @@ void Game_window::EndGame(int win)
     if(win==1)
     {
         HideSceneItems();
-        
+
         text_start_end.show();
-        
+
         text_start_end.setScore(score);
         text_start_end.setGameWon(true);
         text_start_end.show();
-        
+
         score=0;
-        
+
         scene.update();
         playing = false;
         ready_to_restart = true;
     }
-    
+
     else
     {
         sounds.pacman_death_sound.play();
-        
+
         HideSceneItems();
-        
+
         text_start_end.show();
         text_start_end.setScore(score);
         text_start_end.setGameLost(true);
         text_start_end.show();
-        
+
         score=0;
-        
+
         scene.update();
         playing = false;
         ready_to_restart = true;
@@ -249,13 +247,13 @@ void Game_window::EndGame(int win)
 void Game_window::PacmanMove()
 {
     QPoint p;
-    
+
     int pac_x = pac_man.getPac_X();
     int pac_y = pac_man.getPac_Y();
     int direction = pac_man.getDirection();
     int nextdirection = pac_man.getNextDirection();
     int boost=1;
-    
+
     if(nextdirection!=direction)
     {
         switch(nextdirection)
@@ -263,14 +261,14 @@ void Game_window::PacmanMove()
         case left:
             p.setX(pac_x-1);
             p.setY(pac_y);
-            
+
             if(pac_map.IsPointAvailable(p))
             {
                 direction=nextdirection;
                 nextdirection=0;
             }
             break;
-            
+
         case up:
             p.setX(pac_x);
             p.setY(pac_y-1);
@@ -280,7 +278,7 @@ void Game_window::PacmanMove()
                 nextdirection=0;
             }
             break;
-            
+
         case down:
             p.setX(pac_x);
             p.setY(pac_y+1);
@@ -290,7 +288,7 @@ void Game_window::PacmanMove()
                 nextdirection=0;
             }
             break;
-            
+
         case right:
             p.setX(pac_x+1);
             p.setY(pac_y);
@@ -302,10 +300,10 @@ void Game_window::PacmanMove()
             break;
         }
     }
-    
+
     if (speedup==true){boost=2;}
     else {boost=1;}
-    
+
     switch(direction)
     {
     case left:
@@ -314,7 +312,7 @@ void Game_window::PacmanMove()
             p.setX(pac_x-1);
             p.setY(pac_y);
             pac_man.setDirection(direction);
-            
+
             if(pac_map.IsPointAvailable(p))
             {
                 pac_x = pac_x - 1;
@@ -322,14 +320,14 @@ void Game_window::PacmanMove()
             boost--;
         }
         break;
-        
+
     case up:
         while(boost>0)
         {
             p.setX(pac_x);
             p.setY(pac_y-1);
             pac_man.setDirection(direction);
-            
+
             if(pac_map.IsPointAvailable(p))
             {
                 pac_y= pac_y - 1;
@@ -337,14 +335,14 @@ void Game_window::PacmanMove()
             boost--;
         }
         break;
-        
+
     case down:
         while(boost>0)
         {
             p.setX(pac_x);
             p.setY(pac_y+1);
             pac_man.setDirection(direction);
-            
+
             if(pac_map.IsPointAvailable(p))
             {
                 pac_y= pac_y + 1;
@@ -352,14 +350,14 @@ void Game_window::PacmanMove()
             boost--;
         }
         break;
-        
+
     case right:
         while(boost>0)
         {
             p.setX(pac_x+1);
             p.setY(pac_y);
             pac_man.setDirection(direction);
-            
+
             if(pac_map.IsPointAvailable(p))
             {
                 pac_x = pac_x + 1;
@@ -368,833 +366,225 @@ void Game_window::PacmanMove()
         }
         break;
     }
-    
-    if(pac_x==wallpass_left_x && pac_y==wallpass_y) //teleportation when reached left boundary of middle horizontal line
+
+    if(pac_x==wallpass_left_x)
     {
         pac_x=wallpass_right_x-1;
     }
-    
-    if(pac_x==wallpass_right_x && pac_y==wallpass_y) //teleportation when reached right boundary of middle horizontal line
+
+    if(pac_x==wallpass_right_x)
     {
         pac_x=wallpass_left_x;
     }
-    
+
     pac_man.setPac_X(pac_x);
     pac_man.setPac_Y(pac_y);
 }
 
-void Game_window::GhostMove1()
+void Game_window::GhostMove(Ghost & ghost)
 {
     QPoint p;
-    
-    int pac_x = pac_man.getPac_X();
-    int pac_y = pac_man.getPac_Y();
-    int ghost1_x = ghost1.getGhost_X();
-    int ghost1_y = ghost1.getGhost_Y();
-    int ghost1_dir = ghost1.getGhostDirection();
-    int nextghost1_dir = ghost1.getNextGhostDirection();
-    
-    if(!ghostmoving1)
-    {
-        ghost1_dir=(qrand()%4)+1;
-    }
-    else
-    {
-        if((ghost1_dir==right &&ghost1_y<pac_y) || (ghost1_dir==left && ghost1_y>pac_y))
-        {
-            if(ghost1_dir==left && ghost1_y>pac_y)
-            {
-                nextghost1_dir=up;
-            }
-            else if(ghost1_dir==right &&ghost1_y<pac_y)
-            {
-                nextghost1_dir=down;
-            }
-        }
-        else if((ghost1_dir==down && ghost1_x<pac_x) || (ghost1_dir==up && ghost1_x>pac_x))
-        {
-            if(ghost1_dir==up && ghost1_x>pac_x)
-            {
-                nextghost1_dir=left;
-            }
-            else if(ghost1_dir==down && ghost1_x<pac_x)
-            {
-                nextghost1_dir=right;
-            }
-        }
-    }
-    
-    if(nextghost1_dir!=ghost1_dir)
-    {
-        switch(nextghost1_dir)
-        {
-        case left:
-            p.setX(ghost1_x-1);
-            p.setY(ghost1_y);
-            
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost1_dir=nextghost1_dir;
-                nextghost1_dir=0;
-            }
-            
-            break;
-            
-        case right:
-            p.setX(ghost1_x+1);
-            p.setY(ghost1_y);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost1_dir=nextghost1_dir;
-                nextghost1_dir=0;
-            }
-            
-            break;
-        case down:
-            p.setX(ghost1_x);
-            p.setY(ghost1_y+1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost1_dir=nextghost1_dir;
-                nextghost1_dir=0;
-            }
-            
-            break;
-        case up:
-            p.setX(ghost1_x);
-            p.setY(ghost1_y-1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost1_dir=nextghost1_dir;
-                nextghost1_dir=0;
-            }
-            
-            break;
-        }
-    }
-    
-    switch(ghost1_dir)
-    {
-    case left:
-        p.setX(ghost1_x-1);
-        p.setY(ghost1_y);
-        ghost1.setGhostDirection(ghost1_dir);
-        
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost1_x-=1;
-            ghostmoving1=true;
-        }
-        else
-        {
-            ghostmoving1=false;
-        }
-        
-        break;
-        
-    case right:
-        ghost1.setGhostDirection(ghost1_dir);
-        p.setX(ghost1_x+1);
-        p.setY(ghost1_y);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost1_x+=1;
-            ghostmoving1=true;
-        }
-        else
-        {
-            ghostmoving1=false;
-        }
-        
-        break;
-        
-    case down:
-        ghost1.setGhostDirection(ghost1_dir);
-        p.setX(ghost1_x);
-        p.setY(ghost1_y+1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost1_y+=1;
-            ghostmoving1=true;
-        }
-        else
-        {
-            ghostmoving1=false;
-        }
-        
-        break;
-    case up:
-        ghost1.setGhostDirection(ghost1_dir);
-        p.setX(ghost1_x);
-        p.setY(ghost1_y-1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost1_y-=1;
-            ghostmoving1=true;
-        }
-        else
-        {
-            ghostmoving1=false;
-        }
-        
-        break;
-    }
-    
-    if(ghost1_x<=wallpass_left_x)
-    {
-        ghost1_x=wallpass_right_x-1;
-        ghost1_y=wallpass_y;
-    }
-    else if(ghost1_x>=wallpass_right_x)
-    {
-        ghost1_x=wallpass_left_x+1;
-        ghost1_y=wallpass_y;
-    }
-    
-    ghost1.setGhost_X(ghost1_x);
-    ghost1.setGhost_Y(ghost1_y);
-    ghost1.setNextGhostDirection(nextghost1_dir);
-}
-void Game_window::GhostMove2()
-{
-    QPoint p;
-    
-    int pac_x = pac_man.getPac_X();
-    int pac_y = pac_man.getPac_Y();
-    int ghost2_x = ghost2.getGhost_X();
-    int ghost2_y = ghost2.getGhost_Y();
-    int ghost2_dir = ghost2.getGhostDirection();
-    int nextghost2_dir = ghost2.getNextGhostDirection();
-    
-    if(!ghostmoving2)
-    {
-        ghost2_dir=(qrand()%4)+1;
-    }
-    else
-    {
-        if((ghost2_dir==right &&ghost2_y<pac_y) || (ghost2_dir==left && ghost2_y>pac_y))
-        {
-            if(ghost2_dir==left && ghost2_y>pac_y)
-            {
-                nextghost2_dir=up;
-            }
-            else if(ghost2_dir==right &&ghost2_y<pac_y)
-            {
-                nextghost2_dir=down;
-            }
-        }
-        else if((ghost2_dir==down && ghost2_x<pac_x) || (ghost2_dir==up && ghost2_x>pac_x))
-        {
-            if(ghost2_dir==up && ghost2_x>pac_x)
-            {
-                nextghost2_dir=left;
-            }
-            else if(ghost2_dir==down && ghost2_x<pac_x)
-            {
-                nextghost2_dir=right;
-            }
-        }
-    }
-    
-    if(nextghost2_dir!=ghost2_dir)
-    {
-        switch(nextghost2_dir)
-        {
-        case left:
-            p.setX(ghost2_x-1);
-            p.setY(ghost2_y);
-            
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost2_dir=nextghost2_dir;
-                nextghost2_dir=0;
-            }
-            
-            break;
-            
-        case right:
-            p.setX(ghost2_x+1);
-            p.setY(ghost2_y);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost2_dir=nextghost2_dir;
-                nextghost2_dir=0;
-            }
-            
-            break;
-        case down:
-            p.setX(ghost2_x);
-            p.setY(ghost2_y+1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost2_dir=nextghost2_dir;
-                nextghost2_dir=0;
-            }
-            
-            break;
-        case up:
-            p.setX(ghost2_x);
-            p.setY(ghost2_y-1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost2_dir=nextghost2_dir;
-                nextghost2_dir=0;
-            }
-            break;
-        }
-    }
-    
-    switch(ghost2_dir)
-    {
-    case left:
-        p.setX(ghost2_x-1);
-        p.setY(ghost2_y);
-        ghost2.setGhostDirection(ghost2_dir);
-        
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost2_x-=1;
-            ghostmoving2=true;
-        }
-        else
-        {
-            ghostmoving2=false;
-        }
-        
-        break;
-        
-    case right:
-        ghost2.setGhostDirection(ghost2_dir);
-        p.setX(ghost2_x+1);
-        p.setY(ghost2_y);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost2_x+=1;
-            ghostmoving2=true;
-        }
-        else
-        {
-            ghostmoving2=false;
-        }
-        
-        break;
-    case down:
-        ghost2.setGhostDirection(ghost2_dir);
-        p.setX(ghost2_x);
-        p.setY(ghost2_y+1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost2_y+=1;
-            ghostmoving2=true;
-        }
-        else
-        {
-            ghostmoving2=false;
-        }
-        
-        break;
-    case up:
-        ghost2.setGhostDirection(ghost2_dir);
-        p.setX(ghost2_x);
-        p.setY(ghost2_y-1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost2_y-=1;
-            ghostmoving2=true;
-        }
-        else
-        {
-            ghostmoving2=false;
-        }
-        
-        break;
-    }
-    
-    if(ghost2_x<=wallpass_left_x)
-    {
-        ghost2_x=wallpass_right_x-1;
-        ghost2_y=wallpass_y;
-    }
-    else if(ghost2_x>=wallpass_right_x)
-    {
-        ghost2_x=wallpass_left_x+1;
-        ghost2_y=wallpass_y;
-    }
-    
-    ghost2.setGhost_X(ghost2_x);
-    ghost2.setGhost_Y(ghost2_y);
-    ghost2.setNextGhostDirection(nextghost2_dir);
-}
-void Game_window::GhostMove3()
-{
-    QPoint p;
-    
-    int pac_x = pac_man.getPac_X();
-    int pac_y = pac_man.getPac_Y();
-    int ghost3_x = ghost3.getGhost_X();
-    int ghost3_y = ghost3.getGhost_Y();
-    int ghost3_dir = ghost3.getGhostDirection();
-    int nextghost3_dir = ghost3.getNextGhostDirection();
-    
-    if(!ghostmoving3)
-    {
-        ghost3_dir=(qrand()%4)+1;
-    }
-    else
-    {
-        if((ghost3_dir==right &&ghost3_y<pac_y) || (ghost3_dir==left && ghost3_y>pac_y))
-        {
-            if(ghost3_dir==left && ghost3_y>pac_y)
-            {
-                nextghost3_dir=up;
-            }
-            else if(ghost3_dir==right &&ghost3_y<pac_y)
-            {
-                nextghost3_dir=down;
-            }
-            
-        }
-        else if((ghost3_dir==down && ghost3_x<pac_x) || (ghost3_dir==up && ghost3_x>pac_x))
-        {
-            if(ghost3_dir==up && ghost3_x>pac_x)
-            {
-                nextghost3_dir=left;
-            }
-            else if(ghost3_dir==down && ghost3_x<pac_x)
-            {
-                nextghost3_dir=right;
-            }
-        }
-    }
-    
-    if(nextghost3_dir!=ghost3_dir)
-    {
-        switch(nextghost3_dir)
-        {
-        case left:
-            p.setX(ghost3_x-1);
-            p.setY(ghost3_y);
-            
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost3_dir=nextghost3_dir;
-                nextghost3_dir=0;
-                
-            }
-            
-            break;
-            
-        case right:
-            p.setX(ghost3_x+1);
-            p.setY(ghost3_y);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost3_dir=nextghost3_dir;
-                nextghost3_dir=0;
-            }
-            
-            break;
-        case down:
-            p.setX(ghost3_x);
-            p.setY(ghost3_y+1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost3_dir=nextghost3_dir;
-                nextghost3_dir=0;
-            }
-            
-            break;
-        case up:
-            p.setX(ghost3_x);
-            p.setY(ghost3_y-1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost3_dir=nextghost3_dir;
-                nextghost3_dir=0;
-            }
-            break;
-        }
-        
-    }
-    switch(ghost3_dir)
-    {
-    case left:
-        p.setX(ghost3_x-1);
-        p.setY(ghost3_y);
-        ghost3.setGhostDirection(ghost3_dir);
-        
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost3_x-=1;
-            ghostmoving3=true;
-            
-        }
-        else
-        {
-            ghostmoving3=false;
-        }
-        
-        break;
-        
-    case right:
-        ghost3.setGhostDirection(ghost3_dir);
-        p.setX(ghost3_x+1);
-        p.setY(ghost3_y);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost3_x+=1;
-            ghostmoving3=true;
-        }
-        else
-        {
-            ghostmoving3=false;
-        }
-        
-        break;
-    case down:
-        ghost3.setGhostDirection(ghost3_dir);
-        p.setX(ghost3_x);
-        p.setY(ghost3_y+1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost3_y+=1;
-            ghostmoving3=true;
-        }
-        else
-        {
-            ghostmoving3=false;
-        }
-        
-        break;
-    case up:
-        ghost3.setGhostDirection(ghost3_dir);
-        p.setX(ghost3_x);
-        p.setY(ghost3_y-1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost3_y-=1;
-            ghostmoving3=true;
-        }
-        else
-        {
-            ghostmoving3=false;
-        }
-        break;
-    }
-    
-    
-    if(ghost3_x<=wallpass_left_x)
-    {
-        ghost3_x=wallpass_right_x-1;
-        ghost3_y=wallpass_y;
-    }
-    else if(ghost3_x>=wallpass_right_x)
-    {
-        ghost3_x=wallpass_left_x+1;
-        ghost3_y=wallpass_y;
-    }
-    
-    ghost3.setGhost_X(ghost3_x);
-    ghost3.setGhost_Y(ghost3_y);
-    ghost3.setNextGhostDirection(nextghost3_dir);
-}
-void Game_window::GhostMove4()
-{
-    QPoint p;
-    
-    int pac_x = pac_man.getPac_X();
-    int pac_y = pac_man.getPac_Y();
-    int ghost4_x = ghost4.getGhost_X();
-    int ghost4_y = ghost4.getGhost_Y();
-    int ghost4_dir = ghost4.getGhostDirection();
-    int nextghost4_dir = ghost4.getNextGhostDirection();
-    
-    if(!ghostmoving4)
-    {
-        ghost4_dir=(qrand()%4)+1;
-    }
-    else
-    {
-        if((ghost4_dir==right &&ghost4_y<pac_y) || (ghost4_dir==left && ghost4_y>pac_y))
-        {
-            if(ghost4_dir==left && ghost4_y>pac_y)
-            {
-                nextghost4_dir=up;
-            }
-            else if(ghost4_dir==right &&ghost4_y<pac_y)
-            {
-                nextghost4_dir=down;
-            }
-        }
-        else if((ghost4_dir==down && ghost4_x<pac_x) || (ghost4_dir==up && ghost4_x>pac_x))
-        {
-            if(ghost4_dir==up && ghost4_x>pac_x)
-            {
-                nextghost4_dir=left;
-            }
-            else if(ghost4_dir==down && ghost4_x<pac_x)
-            {
-                nextghost4_dir=right;
-            }
-        }
-    }
-    
-    if(nextghost4_dir!=ghost4_dir)
-    {
-        switch(nextghost4_dir)
-        {
-        case left:
-            p.setX(ghost4_x-1);
-            p.setY(ghost4_y);
-            
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost4_dir=nextghost4_dir;
-                nextghost4_dir=0;
-            }
-            
-            break;
-            
-        case right:
-            p.setX(ghost4_x+1);
-            p.setY(ghost4_y);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost4_dir=nextghost4_dir;
-                nextghost4_dir=0;
-            }
-            
-            break;
-        case down:
-            p.setX(ghost4_x);
-            p.setY(ghost4_y+1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost4_dir=nextghost4_dir;
-                nextghost4_dir=0;
-            }
-            
-            break;
-        case up:
-            p.setX(ghost4_x);
-            p.setY(ghost4_y-1);
-            if(pac_map.IsPointAvailable(p))
-            {
-                ghost4_dir=nextghost4_dir;
-                nextghost4_dir=0;
-            }
-            
-            break;
-        }
-        
-    }
-    switch(ghost4_dir)
-    {
-    case left:
-        p.setX(ghost4_x-1);
-        p.setY(ghost4_y);
-        ghost4.setGhostDirection(ghost4_dir);
-        
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost4_x-=1;
-            ghostmoving4=true;
-        }
-        else
-        {
-            ghostmoving4=false;
-        }
-        
-        break;
-        
-    case right:
-        ghost4.setGhostDirection(ghost4_dir);
-        p.setX(ghost4_x+1);
-        p.setY(ghost4_y);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost4_x+=1;
-            ghostmoving4=true;
-        }
-        else
-        {
-            ghostmoving4=false;
-        }
-        
-        break;
-    case down:
-        ghost4.setGhostDirection(ghost4_dir);
-        p.setX(ghost4_x);
-        p.setY(ghost4_y+1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost4_y+=1;
-            ghostmoving4=true;
-        }
-        else
-        {
-            ghostmoving4=false;
-        }
-        
-        break;
-    case up:
-        ghost4.setGhostDirection(ghost4_dir);
-        p.setX(ghost4_x);
-        p.setY(ghost4_y-1);
-        if(pac_map.IsPointAvailable(p))
-        {
-            ghost4_y-=1;
-            ghostmoving4=true;
-        }
-        else
-        {
-            ghostmoving4=false;
-        }
-        break;
-    }
-    
-    if(ghost4_x<=wallpass_left_x)
-    {
-        ghost4_x=wallpass_right_x-1;
-        ghost4_y=wallpass_y;
-    }
-    else if(ghost4_x>=wallpass_right_x)
-    {
-        ghost4_x=wallpass_left_x+1;
-        ghost4_y=wallpass_y;
-    }
-    
-    ghost4.setGhost_X(ghost4_x);
-    ghost4.setGhost_Y(ghost4_y);
-    ghost4.setNextGhostDirection(nextghost4_dir);
-}
 
-void Game_window::MoveGhostInStartingRect1()
-{
-    int ghost1_x = ghost1.getGhost_X();
-    int ghost1_y = ghost1.getGhost_Y();
-    int ghost1_dir = ghost1.getGhostDirection();
-    
-    if(ghost1_x==cage_center-cage_wigth || ghost1_x==cage_center+cage_wigth)
+    int pac_x = pac_man.getPac_X();
+    int pac_y = pac_man.getPac_Y();
+    int ghost_x = ghost.getGhost_X();
+    int ghost_y = ghost.getGhost_Y();
+    int ghost_dir = ghost.getGhostDirection();
+    int nextghost_dir = ghost.getNextGhostDirection();
+
+    if(!ghost.ghostmoving)
     {
-        if(ghost1_dir==right)
-        {
-            ghost1_dir=left;
-        }
-        else
-        {
-            ghost1_dir=right;
-        }
-    }
-    
-    if(ghost1_dir==right)
-    {
-        ghost1_x+=1;
+        ghost_dir=(qrand()%4)+1;
     }
     else
     {
-        ghost1_x-=1;
+        if((ghost_dir==right &&ghost_y<pac_y) || (ghost_dir==left && ghost_y>pac_y))
+        {
+            if(ghost_dir==left && ghost_y>pac_y)
+            {
+                nextghost_dir=up;
+            }
+            else if(ghost_dir==right &&ghost_y<pac_y)
+            {
+                nextghost_dir=down;
+            }
+        }
+        else if((ghost_dir==down && ghost_x<pac_x) || (ghost_dir==up && ghost_x>pac_x))
+        {
+            if(ghost_dir==up && ghost_x>pac_x)
+            {
+                nextghost_dir=left;
+            }
+            else if(ghost_dir==down && ghost_x<pac_x)
+            {
+                nextghost_dir=right;
+            }
+        }
     }
-    
-    ghost1.setGhost_X(ghost1_x);
-    ghost1.setGhost_Y(ghost1_y);
-    ghost1.setGhostDirection(ghost1_dir);
+
+    if(nextghost_dir!=ghost_dir)
+    {
+        switch(nextghost_dir)
+        {
+        case left:
+            p.setX(ghost_x-1);
+            p.setY(ghost_y);
+
+            if(pac_map.IsPointAvailable(p))
+            {
+                ghost_dir=nextghost_dir;
+                nextghost_dir=0;
+            }
+
+            break;
+
+        case right:
+            p.setX(ghost_x+1);
+            p.setY(ghost_y);
+            if(pac_map.IsPointAvailable(p))
+            {
+                ghost_dir=nextghost_dir;
+                nextghost_dir=0;
+            }
+
+            break;
+        case down:
+            p.setX(ghost_x);
+            p.setY(ghost_y+1);
+            if(pac_map.IsPointAvailable(p))
+            {
+                ghost_dir=nextghost_dir;
+                nextghost_dir=0;
+            }
+
+            break;
+        case up:
+            p.setX(ghost_x);
+            p.setY(ghost_y-1);
+            if(pac_map.IsPointAvailable(p))
+            {
+                ghost_dir=nextghost_dir;
+                nextghost_dir=0;
+            }
+
+            break;
+        }
+
+    }
+    switch(ghost_dir)
+    {
+    case left:
+        p.setX(ghost_x-1);
+        p.setY(ghost_y);
+        ghost.setGhostDirection(ghost_dir);
+
+        if(pac_map.IsPointAvailable(p))
+        {
+            ghost_x-=1;
+            ghost.ghostmoving=true;
+        }
+        else
+        {
+            ghost.ghostmoving=false;
+        }
+
+        break;
+
+    case right:
+        ghost.setGhostDirection(ghost_dir);
+        p.setX(ghost_x+1);
+        p.setY(ghost_y);
+        if(pac_map.IsPointAvailable(p))
+        {
+            ghost_x+=1;
+            ghost.ghostmoving=true;
+        }
+        else
+        {
+            ghost.ghostmoving=false;
+        }
+
+        break;
+    case down:
+        ghost.setGhostDirection(ghost_dir);
+        p.setX(ghost_x);
+        p.setY(ghost_y+1);
+        if(pac_map.IsPointAvailable(p))
+        {
+            ghost_y+=1;
+            ghost.ghostmoving=true;
+        }
+        else
+        {
+            ghost.ghostmoving=false;
+        }
+
+        break;
+    case up:
+        ghost.setGhostDirection(ghost_dir);
+        p.setX(ghost_x);
+        p.setY(ghost_y-1);
+        if(pac_map.IsPointAvailable(p))
+        {
+            ghost_y-=1;
+            ghost.ghostmoving=true;
+        }
+        else
+        {
+            ghost.ghostmoving=false;
+        }
+        break;
+    }
+
+    if(ghost_x<=wallpass_left_x)
+    {
+        ghost_x=wallpass_right_x-1;
+    }
+    else if(ghost_x>=wallpass_right_x)
+    {
+        ghost_x=wallpass_left_x+1;
+    }
+
+    ghost.setGhost_X(ghost_x);
+    ghost.setGhost_Y(ghost_y);
+    ghost.setNextGhostDirection(nextghost_dir);
 }
-void Game_window::MoveGhostInStartingRect2()
+void Game_window::MoveGhostInStartingRect(Ghost & ghost)
 {
-    int ghost2_x = ghost2.getGhost_X();
-    int ghost2_y = ghost2.getGhost_Y();
-    int ghost2_dir = ghost2.getGhostDirection();
-    
-    if(ghost2_x==cage_center-cage_wigth || ghost2_x==cage_center+cage_wigth)
+    int ghost_x = ghost.getGhost_X();
+    int ghost_y = ghost.getGhost_Y();
+    int ghost_dir = ghost.getGhostDirection();
+
+    if(ghost_x==cage_center-cage_wigth || ghost_x==cage_center+cage_wigth)
     {
-        if(ghost2_dir==right)
+        if(ghost_dir==right)
         {
-            ghost2_dir=left;
+            ghost_dir=left;
         }
         else
         {
-            ghost2_dir=right;
+            ghost_dir=right;
         }
     }
-    if(ghost2_dir==right)
+
+    if(ghost_dir==right)
     {
-        ghost2_x+=1;
+        ghost_x+=1;
     }
     else
     {
-        ghost2_x-=1;
+        ghost_x-=1;
     }
-    
-    ghost2.setGhost_X(ghost2_x);
-    ghost2.setGhost_Y(ghost2_y);
-    ghost2.setGhostDirection(ghost2_dir);
-}
-void Game_window::MoveGhostInStartingRect3()
-{
-    int ghost3_x = ghost3.getGhost_X();
-    int ghost3_y = ghost3.getGhost_Y();
-    int ghost3_dir = ghost3.getGhostDirection();
-    
-    if(ghost3_x==cage_center-cage_wigth || ghost3_x==cage_center+cage_wigth)
-    {
-        if(ghost3_dir==right)
-        {
-            ghost3_dir=left;
-        }
-        else
-        {
-            ghost3_dir=right;
-        }
-    }
-    if(ghost3_dir==right)
-    {
-        ghost3_x+=1;
-    }
-    else
-    {
-        ghost3_x-=1;
-    }
-    
-    ghost3.setGhost_X(ghost3_x);
-    ghost3.setGhost_Y(ghost3_y);
-    ghost3.setGhostDirection(ghost3_dir);
-}
-void Game_window::MoveGhostInStartingRect4()
-{
-    int ghost4_x = ghost4.getGhost_X();
-    int ghost4_y = ghost4.getGhost_Y();
-    int ghost4_dir = ghost4.getGhostDirection();
-    
-    if(ghost4_x==cage_center-cage_wigth || ghost4_x==cage_center+cage_wigth)
-    {
-        if(ghost4_dir==right)
-        {
-            ghost4_dir=left;
-        }
-        else
-        {
-            ghost4_dir=right;
-        }
-    }
-    if(ghost4_dir==right)
-    {
-        ghost4_x+=1;
-    }
-    else
-    {
-        ghost4_x-=1;
-    }
-    
-    ghost4.setGhost_X(ghost4_x);
-    ghost4.setGhost_Y(ghost4_y);
-    ghost4.setGhostDirection(ghost4_dir);
+
+    ghost.setGhost_X(ghost_x);
+    ghost.setGhost_Y(ghost_y);
+    ghost.setGhostDirection(ghost_dir);
 }
 
 void Game_window::keyPressEvent(QKeyEvent *event) //supports pacman movement using WSAD and directional keys
 {
     int nextdirection=pac_man.getNextDirection();
-    
+
     switch(event->key())
     {
     case Qt::Key_Left:
@@ -1203,48 +593,63 @@ void Game_window::keyPressEvent(QKeyEvent *event) //supports pacman movement usi
     case Qt::Key_A:
         nextdirection=left;
         break;
-        
+
     case Qt::Key_Right:
         nextdirection=right;
         break;
     case Qt::Key_D:
         nextdirection=right;
         break;
-        
+
     case Qt::Key_Down:
         nextdirection=down;
         break;
     case Qt::Key_S:
         nextdirection=down;
         break;
-        
+
     case Qt::Key_Up:
         nextdirection=up;
         break;
     case Qt::Key_W:
         nextdirection=up;
         break;
-        
+
     case Qt::Key_1:
         if(!playing && ready_to_restart == true)
         {
-            ghost1.setskin(0);
-            ghost2.setskin(0);
-            ghost3.setskin(0);
-            ghost4.setskin(0);
-            pac_map.setskin(0);
+            skin=0;
+            ghost1.setskin(skin);
+            ghost2.setskin(skin);
+            ghost3.setskin(skin);
+            ghost4.setskin(skin);
+            Map::s_setSkin(skin);
         }
         break;
     case Qt::Key_2:
         if(!playing && ready_to_restart == true)
         {
-            ghost1.setskin(1);
-            ghost2.setskin(1);
-            ghost3.setskin(1);
-            ghost4.setskin(1);
-            pac_map.setskin(1);
+            skin=1;
+            ghost1.setskin(skin);
+            ghost2.setskin(skin);
+            ghost3.setskin(skin);
+            ghost4.setskin(skin);
+            Map::s_setSkin(skin);
         }
-        
+        break;
+    case Qt::Key_3:
+        if(!playing && ready_to_restart == true)
+        {
+            skin=2;
+            Map::s_setSkin(skin);
+        }
+        break;
+    case Qt::Key_4:
+        if(!playing && ready_to_restart == true)
+        {
+            skin=3;
+            Map::s_setSkin(skin);
+        }
         break;
     case Qt::Key_Space:
         if(!playing && ready_to_restart == false)
@@ -1258,8 +663,8 @@ void Game_window::keyPressEvent(QKeyEvent *event) //supports pacman movement usi
             playing = true;
             RestartGame();
         }
-        
-    default:
+
+        break; default:
         break;
     }
     pac_man.setNextDirection(nextdirection);
@@ -1321,14 +726,14 @@ void Game_window::updater()
 {
     int pac_x = pac_man.getPac_X();
     int pac_y = pac_man.getPac_Y();
-    
+
     if(collision_detection_delay >= 500)
         CheckCollision();
     else
         collision_detection_delay++;
-    
+
     PacmanMove();  //changes position of pacman
-    
+
     for(int i=0;i<foodball_positions.size();i++)
     {
         if((pac_x==foodball_positions.at(i).x() && pac_y==foodball_positions.at(i).y())
@@ -1340,24 +745,24 @@ void Game_window::updater()
             foodball_positions.remove(i);
             foodball_graphical_items_table.at(i)->hide();
             foodball_graphical_items_table.remove(i);
-            
+
             if(sounds.eat_sound1.state()==QMediaPlayer::StoppedState)
             {
                 sounds.eat_sound1.play();
             }
-            
+
             if(sounds.eat_sound1.state()==QMediaPlayer::PlayingState)
             {
                 sounds.eat_sound2.play();
             }
-            
+
             score++;
             score_display->setPlainText("Score: " + QString::number(score));
-            
+
             foodball_items_count--;
         }
     }
-    
+
     for(int i=0;i<speedball_positions.size();i++)
     {
         if((pac_x==speedball_positions.at(i).x() && pac_y==speedball_positions.at(i).y())
@@ -1369,30 +774,30 @@ void Game_window::updater()
             speedball_positions.remove(i);
             speedball_graphical_items_table.at(i)->hide();
             speedball_graphical_items_table.remove(i);
-            
+
             score += 100;
             score_display->setPlainText("Score: " + QString::number(score));
-            
+
             speedstate = 0;
-            
+
             speedup=true;
-            
+
             score_display->setPlainText("Score: " + QString::number(score));
         }
     }
     if(speedup)
     {
         speedstate+=1;
-        
+
         if(speedstate==1)
         {
             pacmantimer.setInterval(50);
         }
-        
+
         if(speedstate==1000)
         {
             speedup=false;
-            
+
             speedstate = 0;
             pacmantimer.setInterval(4);
         }
@@ -1408,39 +813,39 @@ void Game_window::updater()
             powerball_positions.remove(i);
             powerball_graphical_items_table.at(i)->hide();
             powerball_graphical_items_table.remove(i);
-            
-            score += 100;
+
+            score += 99;
             score_display->setPlainText("Score: " + QString::number(score));
-            
+
             scarestate = 0;
-            
+
             ghost1.setIsScared(true);
             ghost2.setIsScared(true);
             ghost3.setIsScared(true);
             ghost4.setIsScared(true);
-            
+
             scared=true;
-            
+
             score_display->setPlainText("Score: " + QString::number(score));
         }
     }
-    
+
     if(foodball_items_count==0)
     {
         timer.stop();
         ghoststimer.stop();
         EndGame(1);
     }
-    
+
     if(scared)
     {
         scarestate+=1;
-        
+
         if(scarestate==1)
         {
             ghoststimer.setInterval(50);
         }
-        
+
         if(scarestate==750)
         {
             ghost1.setScaredWhite(true);
@@ -1448,7 +853,7 @@ void Game_window::updater()
             ghost3.setScaredWhite(true);
             ghost4.setScaredWhite(true);
         }
-        
+
         if(scarestate==1000)
         {
             scared=false;
@@ -1456,23 +861,23 @@ void Game_window::updater()
             ghost2.setIsScared(false);
             ghost3.setIsScared(false);
             ghost4.setIsScared(false);
-            
+
             ghost1.setScaredWhite(false);
             ghost2.setScaredWhite(false);
             ghost3.setScaredWhite(false);
             ghost4.setScaredWhite(false);
-            
+
             scarestate = 0;
             ghoststimer.setInterval(4);
         }
     }
-    
+
     pac_man.advance();
     ghost1.advance();
     ghost2.advance();
     ghost3.advance();
     ghost4.advance();
-    
+
     scene.update(scene.sceneRect());
 }
 
@@ -1486,41 +891,41 @@ void Game_window::ghostupdater()
     int ghost3_y = ghost3.getGhost_Y();
     int ghost4_x = ghost4.getGhost_X();
     int ghost4_y = ghost4.getGhost_Y();
-    
+
     if(all_ghosts_started)
     {
-        GhostMove1();
-        GhostMove2();
-        GhostMove3();
-        GhostMove4();
+        GhostMove(ghost1);
+        GhostMove(ghost2);
+        GhostMove(ghost3);
+        GhostMove(ghost4);
     }
     else
     {
         if(!ghoststart1)
-            MoveGhostInStartingRect1();
+            MoveGhostInStartingRect(ghost1);
         else
-            GhostMove1();
-        
+            GhostMove(ghost1);
+
         if(!ghoststart2)
-            MoveGhostInStartingRect2();
+            MoveGhostInStartingRect(ghost2);
         else
-            GhostMove2();
-        
+            GhostMove(ghost2);
+
         if(!ghoststart3)
-            MoveGhostInStartingRect3();
+            MoveGhostInStartingRect(ghost3);
         else
-            GhostMove3();
-        
+            GhostMove(ghost3);
+
         if(!ghoststart4)
-            MoveGhostInStartingRect4();
+            MoveGhostInStartingRect(ghost4);
         else
-            GhostMove4();
-        
+            GhostMove(ghost4);
+
         if(ghost1_x==300 || ghost2_x==300 || ghost3_x==300 || ghost4_x==300) //substitute of timer to be implemented for every ghost do differentiate start time
         {
             start_timer++;
         }
-        
+
         if(start_timer>=3) // ghost 1 starts
         {
             QPoint p1;
@@ -1532,7 +937,7 @@ void Game_window::ghostupdater()
             {
                 ghost1_x+=1;
             }
-            
+
             if(!ghoststart1)
             {
                 ghost1_y-=1;
@@ -1540,13 +945,13 @@ void Game_window::ghostupdater()
                 ghost1.setGhost_Y(ghost1_y);
                 p1.setX(ghost1_x);
                 p1.setY(ghost1_y);
-                if(pac_map.getPacmanPaths().contains(p1))
+                if(Map::s_getPacmanPaths().contains(p1))
                 {
                     ghoststart1=true;
                 }
             }
         }
-        
+
         if(start_timer>=6) // ghost 2 starts
         {
             QPoint p2;
@@ -1558,7 +963,7 @@ void Game_window::ghostupdater()
             {
                 ghost2_x+=1;
             }
-            
+
             if(!ghoststart2)
             {
                 ghost2_y-=1;
@@ -1566,13 +971,13 @@ void Game_window::ghostupdater()
                 ghost2.setGhost_Y(ghost2_y);
                 p2.setX(ghost2_x);
                 p2.setY(ghost2_y);
-                if(pac_map.getPacmanPaths().contains(p2))
+                if(Map::s_getPacmanPaths().contains(p2))
                 {
                     ghoststart2=true;
                 }
             }
         }
-        
+
         if(start_timer>=9) // ghost 3 starts
         {
             QPoint p3;
@@ -1584,7 +989,7 @@ void Game_window::ghostupdater()
             {
                 ghost3_x+=1;
             }
-            
+
             if(!ghoststart3)
             {
                 ghost3_y-=1;
@@ -1592,13 +997,13 @@ void Game_window::ghostupdater()
                 ghost3.setGhost_Y(ghost3_y);
                 p3.setX(ghost3_x);
                 p3.setY(ghost3_y);
-                if(pac_map.getPacmanPaths().contains(p3))
+                if(Map::s_getPacmanPaths().contains(p3))
                 {
                     ghoststart3=true;
                 }
             }
         }
-        
+
         if(start_timer>=12) // ghost 4 starts
         {
             QPoint p4;
@@ -1610,7 +1015,7 @@ void Game_window::ghostupdater()
             {
                 ghost4_x+=1;
             }
-            
+
             if(!ghoststart4)
             {
                 ghost4_y-=1;
@@ -1618,13 +1023,13 @@ void Game_window::ghostupdater()
                 ghost4.setGhost_Y(ghost4_y);
                 p4.setX(ghost4_x);
                 p4.setY(ghost4_y);
-                if(pac_map.getPacmanPaths().contains(p4))
+                if(Map::s_getPacmanPaths().contains(p4))
                 {
                     ghoststart4=true;
                 }
             }
         }
-        
+
         if(ghoststart1&&ghoststart2&&ghoststart3&&ghoststart4)
             all_ghosts_started=true;
     }

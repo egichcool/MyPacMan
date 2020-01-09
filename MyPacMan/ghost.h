@@ -10,29 +10,29 @@ private:
     QPixmap ghost_pixmap;
     QPixmap ghost_scared_blue;
     QPixmap ghost_scared_white;
-    
+
     QPixmap left1,left2;
     QPixmap up1,up2;
     QPixmap down1,down2;
     QPixmap right1,right2;
     QPixmap scaredblue, scaredblue1;
     QPixmap scaredwhite, scaredwhite1;
-    
+
     bool is_scared;
     bool scared_white;
     bool hidden;
-    
+
     int animestate;
     int animation_modify_factor;
-    
+
     int ghost_x,ghost_y;
     int ghostdirection;
     int nextghostdirection;
-    
-    int skin=0;
-    
+
+    int skin=1;
+
     enum direction {left=1, up, down, right};
-    
+
     QString image[2][36]= {
         {":/ghosts/images/ghost_images/ghostright1.png",
          ":/ghosts/images/ghost_images/ghostright2.png",
@@ -70,7 +70,7 @@ private:
          ":/ghosts/images/ghost_images/ghostdownred2.png",
          ":/ghosts/images/ghost_images/ghostleftred1.png",
          ":/ghosts/images/ghost_images/ghostleftred2.png"},
-        
+
         {":/ghosts_neon/images/ghost2_images/ghostright1.png",
          ":/ghosts_neon/images/ghost2_images/ghostright2.png",
          ":/ghosts_neon/images/ghost2_images/ghostup1.png",
@@ -108,14 +108,14 @@ private:
          ":/ghosts_neon/images/ghost2_images/ghostleftred1.png",
          ":/ghosts_neon/images/ghost2_images/ghostleftred2.png"}
     };
-    
+
 public:
     Ghost();
     QRectF boundingRect() const;
     void setskin(int skin);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     void advance();
-    
+
     void setGhost_X(int);
     void setGhost_Y(int);
     void setIsScared(bool option) {is_scared=option;}
@@ -123,13 +123,14 @@ public:
     void setGhostDirection(int dir) {ghostdirection=dir;}
     void setNextGhostDirection(int dir) {nextghostdirection=dir;}
     void setGhostColor(QString col);
-    
+
     int getGhost_X() {return ghost_x;}
     int getGhost_Y() {return ghost_y;}
     int getGhostDirection() {return ghostdirection;}
     int getNextGhostDirection() {return nextghostdirection;}
     bool getIsScared() {return is_scared;}
     bool getScaredWhite() {return scared_white;}
+    bool ghostmoving=false;
 };
 
 #endif // GHOST_H
