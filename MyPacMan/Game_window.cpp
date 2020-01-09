@@ -808,10 +808,6 @@ void Game_window::updater()
             {
                 ghosts[i].setScaredWhite(true);
             }
-            ghost1.setScaredWhite(true);
-            ghost2.setScaredWhite(true);
-            ghost3.setScaredWhite(true);
-            ghost4.setScaredWhite(true);
         }
 
         if(scarestate==1000)
@@ -894,7 +890,7 @@ void Game_window::ghostupdater()
                 }
             }
         }
-        if(ghoststart1&&ghoststart2&&ghoststart3&&ghoststart4)
+        if(ghoststarts[0]&&ghoststarts[1]&&ghoststarts[2]&&ghoststarts[3])
             all_ghosts_started=true;
     }
 }

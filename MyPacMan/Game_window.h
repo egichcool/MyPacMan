@@ -43,10 +43,6 @@ private:
     FoodBall food_ball;
 
     Pacman pac_man;
-    Ghost ghost1;
-    Ghost ghost2;
-    Ghost ghost3;
-    Ghost ghost4;
     Ghost ghosts[4];
 
     Sounds sounds;
@@ -63,8 +59,8 @@ private:
     int scarestate;
     int speedstate;
     int start_timer;
-    const int pacmap_speed=4; // To raise the speed set value less
-    const int ghost_speed=4;  // To lower the speed set value more
+    const int pacmap_speed=3; // To raise the speed set value less
+    const int ghost_speed=3;  // To lower the speed set value more
     const int map_width=614;
     const int map_hight=740;
     const int pac_first_x=320;
@@ -78,8 +74,6 @@ private:
     const int cage_center=307;
     const int cage_wigth=50;
 
-    bool ghostmoving1,ghostmoving2,ghostmoving3,ghostmoving4;
-    bool ghoststart1,ghoststart2,ghoststart3,ghoststart4;
     bool ghoststarts[4];
     bool ghostmoving[4];
     bool start, playing, scared, speedup, all_ghosts_started, ready_to_restart;
